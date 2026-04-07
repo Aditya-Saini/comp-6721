@@ -1,5 +1,5 @@
-const ROWS = 28;
-const COLS = 42;
+let ROWS = 28;
+let COLS = 42;
 
 /** @type {boolean[][]} */
 let walls = [];
@@ -24,6 +24,15 @@ const mExpanded = document.getElementById("m-expanded");
 const mPath = document.getElementById("m-path");
 const mTime = document.getElementById("m-time");
 
+const gridSizeSelect = document.getElementById("grid-size");
+const customSizeDiv = document.getElementById("custom-size");
+const customRowsInput = document.getElementById("custom-rows");
+const customColsInput = document.getElementById("custom-cols");
+const btnApplyCustom = document.getElementById("apply-custom-size");
+const btnRandomMaze = document.getElementById("random-maze");
+const densityRange = document.getElementById("wall-density");
+const densityLabel = document.getElementById("density-label");
+
 function initGridData() {
   walls = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
 }
@@ -32,8 +41,17 @@ function cellIndex(r, c) {
   return r * COLS + c;
 }
 
+function autoFitCellSize() {
+  const wrapEl = gridEl.parentElement;
+  const available = wrapEl.clientWidth - 24; // padding
+  const ideal = Math.floor(available / COLS) - 1; // minus gap
+  const size = Math.max(10, Math.min(22, ideal));
+  gridEl.style.setProperty("--cell-size", size + "px");
+}
+
 function buildGridDom() {
   gridEl.innerHTML = "";
+  autoFitCellSize();
   gridEl.style.gridTemplateColumns = `repeat(${COLS}, var(--cell-size, 22px))`;
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
@@ -48,6 +66,29 @@ function buildGridDom() {
       gridEl.appendChild(div);
     }
   }
+}
+
+function resizeGrid(newRows, newCols) {
+  stopAnimation();
+  ROWS = Math.max(5, Math.min(60, newRows));
+  COLS = Math.max(5, Math.min(80, newCols));
+  start = [Math.floor(ROWS / 2), Math.min(2, COLS - 2)];
+  goal = [Math.floor(ROWS / 2), Math.max(COLS - 3, 2)];
+  initGridData();
+  buildGridDom();
+  resetSearchVisual();
+}
+
+function generateRandomWalls(density) {
+  stopAnimation();
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      walls[r][c] = Math.random() < density;
+    }
+  }
+  walls[start[0]][start[1]] = false;
+  walls[goal[0]][goal[1]] = false;
+  resetSearchVisual();
 }
 
 function paintCell(el, r, c, opts = {}) {
@@ -369,11 +410,43 @@ btnClearWalls.addEventListener("click", () => {
   fullRedraw({ showSearch: false });
 });
 
+gridSizeSelect.addEventListener("change", () => {
+  const val = gridSizeSelect.value;
+  if (val === "custom") {
+    customSizeDiv.style.display = "flex";
+    return;
+  }
+  customSizeDiv.style.display = "none";
+  const [r, c] = val.split(",").map(Number);
+  resizeGrid(r, c);
+});
+
+btnApplyCustom.addEventListener("click", () => {
+  const r = parseInt(customRowsInput.value, 10) || 20;
+  const c = parseInt(customColsInput.value, 10) || 35;
+  resizeGrid(r, c);
+});
+
+btnRandomMaze.addEventListener("click", () => {
+  const density = Number(densityRange.value) / 100;
+  generateRandomWalls(density);
+});
+
+densityRange.addEventListener("input", () => {
+  densityLabel.textContent = densityRange.value + "%";
+});
+
+window.addEventListener("resize", () => {
+  autoFitCellSize();
+  gridEl.style.gridTemplateColumns = `repeat(${COLS}, var(--cell-size, 22px))`;
+});
+
 async function boot() {
   initGridData();
   buildGridDom();
   syncToolButtons();
   speedLabel.textContent = speedRange.value;
+  densityLabel.textContent = densityRange.value + "%";
   try {
     await loadAlgorithmOptions();
   } catch {

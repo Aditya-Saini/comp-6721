@@ -30,13 +30,37 @@
 
         <aside class="panel">
           <h2>Grid editor</h2>
+          <label class="row">
+            <span>Size</span>
+            <select id="grid-size" aria-label="Grid size">
+              <option value="15,25">Small (15 × 25)</option>
+              <option value="20,35">Medium (20 × 35)</option>
+              <option value="28,42" selected>Large (28 × 42)</option>
+              <option value="40,60">XL (40 × 60)</option>
+              <option value="custom">Custom…</option>
+            </select>
+          </label>
+          <div id="custom-size" class="row" style="display:none; gap:0.4rem; margin-bottom:0.6rem">
+            <input type="number" id="custom-rows" min="5" max="60" value="28" style="width:4rem" placeholder="Rows" aria-label="Custom rows" />
+            <span>×</span>
+            <input type="number" id="custom-cols" min="5" max="80" value="42" style="width:4rem" placeholder="Cols" aria-label="Custom columns" />
+            <button type="button" class="btn-secondary" id="apply-custom-size" style="padding:0.35rem 0.6rem; font-size:0.8rem">Apply</button>
+          </div>
           <div class="toolbar">
             <button type="button" class="tool-btn active" data-tool="wall" title="Toggle wall">Wall</button>
             <button type="button" class="tool-btn" data-tool="erase" title="Remove wall">Erase</button>
             <button type="button" class="tool-btn" data-tool="start" title="Move start">Start</button>
             <button type="button" class="tool-btn" data-tool="goal" title="Move goal">Goal</button>
           </div>
-          <button type="button" class="btn-secondary" id="clear-walls">Clear all walls</button>
+          <div class="grid-actions">
+            <button type="button" class="btn-secondary" id="clear-walls">Clear all walls</button>
+            <button type="button" class="btn-secondary" id="random-maze">Random maze</button>
+          </div>
+          <label class="row">
+            <span>Density</span>
+            <input type="range" id="wall-density" min="10" max="40" value="25" />
+            <span id="density-label" style="width:2.5rem; text-align:right">25%</span>
+          </label>
 
           <h2>Search</h2>
           <label class="row">
