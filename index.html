@@ -23,8 +23,15 @@
       </header>
 
       <div class="layout">
-        <div class="grid-wrap">
-          <div id="grid" class="grid" aria-label="Search grid"></div>
+        <div class="grids-container" id="grids-container">
+          <div class="grid-wrap" id="grid-wrap-a">
+            <div class="grid-label" id="grid-label-a"></div>
+            <div id="grid" class="grid" aria-label="Search grid"></div>
+          </div>
+          <div class="grid-wrap hidden" id="grid-wrap-b">
+            <div class="grid-label" id="grid-label-b"></div>
+            <div id="grid-b" class="grid" aria-label="Comparison grid"></div>
+          </div>
           <p id="status" class="status" role="status"></p>
         </div>
 
@@ -67,6 +74,10 @@
             <span>Algorithm</span>
             <select id="algorithm" aria-label="Search algorithm"></select>
           </label>
+          <label class="row compare-row hidden" id="compare-row">
+            <span>Compare</span>
+            <select id="algorithm-b" aria-label="Comparison algorithm"></select>
+          </label>
           <label class="row">
             <span>Speed</span>
             <input type="range" id="speed" min="0" max="500" value="400" />
@@ -77,10 +88,11 @@
             <button type="button" class="btn-primary" id="run">Run search</button>
             <button type="button" class="btn-secondary" id="step">Jump to end</button>
             <button type="button" class="btn-secondary" id="reset-search">Clear visualization</button>
+            <button type="button" class="btn-compare" id="toggle-compare">Compare mode</button>
           </div>
 
           <h2>Metrics</h2>
-          <div class="metrics">
+          <div id="metrics-single" class="metrics">
             <div class="metric">
               <span>Nodes expanded</span>
               <strong id="m-expanded">—</strong>
@@ -92,6 +104,20 @@
             <div class="metric" style="grid-column: 1 / -1">
               <span>Execution time</span>
               <strong id="m-time">—</strong>
+            </div>
+          </div>
+          <div id="metrics-compare" class="metrics-compare hidden">
+            <div class="metrics-col">
+              <div class="metrics-col-header" id="mc-header-a">Algorithm A</div>
+              <div class="metric"><span>Nodes expanded</span><strong id="mc-expanded-a">—</strong></div>
+              <div class="metric"><span>Path length</span><strong id="mc-path-a">—</strong></div>
+              <div class="metric"><span>Exec time</span><strong id="mc-time-a">—</strong></div>
+            </div>
+            <div class="metrics-col">
+              <div class="metrics-col-header" id="mc-header-b">Algorithm B</div>
+              <div class="metric"><span>Nodes expanded</span><strong id="mc-expanded-b">—</strong></div>
+              <div class="metric"><span>Path length</span><strong id="mc-path-b">—</strong></div>
+              <div class="metric"><span>Exec time</span><strong id="mc-time-b">—</strong></div>
             </div>
           </div>
 
