@@ -527,6 +527,57 @@ async function stepOnce() {
   if (!validateSearch() || animating) return;
   statusEl.textContent = "Searching…";
   btnStep.disabled = true;
+
+  if (compareMode) {
+    let outA, outB;
+    try {
+      [outA, outB] = await Promise.all([
+        runSearchRemote(algoSelect.value),
+        runSearchRemote(algoSelectB.value),
+      ]);
+    } catch (e) {
+      const msg =
+        e instanceof TypeError && e.message === "Failed to fetch"
+          ? "Cannot reach the Python server. Run: python3 server.py"
+          : e.message || String(e);
+      statusEl.textContent = msg;
+      statusEl.className = "status error";
+      btnStep.disabled = false;
+      return;
+    }
+    btnStep.disabled = false;
+
+    const resultA = { found: outA.found, nodesExpanded: outA.nodesExpanded, path: outA.path, steps: outA.steps };
+    const resultB = { found: outB.found, nodesExpanded: outB.nodesExpanded, path: outB.path, steps: outB.steps };
+    lastResult = resultA;
+    lastResultB = resultB;
+    updateCompareMetrics(resultA, outA.timeMs, resultB, outB.timeMs);
+    gridLabelA.textContent = algoNameById(algoSelect.value);
+    gridLabelB.textContent = algoNameById(algoSelectB.value);
+
+    if (!resultA.found && !resultB.found) {
+      statusEl.textContent = "No path exists for either algorithm.";
+      statusEl.className = "status error";
+      fullRedraw({ showSearch: false });
+      fullRedrawB({ showSearch: false });
+      return;
+    }
+
+    if (resultA.found) {
+      const lastA = resultA.steps[resultA.steps.length - 1];
+      applyStepOnGrid(gridEl, lastA, resultA.path);
+    } else { fullRedraw({ showSearch: false }); }
+
+    if (resultB.found) {
+      const lastB = resultB.steps[resultB.steps.length - 1];
+      applyStepOnGrid(gridElB, lastB, resultB.path);
+    } else { fullRedrawB({ showSearch: false }); }
+
+    statusEl.textContent = "Showing final state for both algorithms.";
+    statusEl.className = "status success";
+    return;
+  }
+
   let out;
   try {
     out = await runSearchRemote();
@@ -558,7 +609,7 @@ async function stepOnce() {
     return;
   }
   statusEl.textContent = "Showing final state (all expansions). Use Run for animation.";
-  statusEl.className = "status";
+  statusEl.className = "status success";
   const last = result.steps[result.steps.length - 1];
   applyStep(last, result.path);
 }
